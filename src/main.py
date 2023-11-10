@@ -2,6 +2,7 @@
 from src.state import Context, StateStart, StateEnd
 
 
+
 def main():
     """ Стартовая точка проекта """
     context = Context(StateStart())
