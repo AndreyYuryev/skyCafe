@@ -60,7 +60,7 @@ class State(ABC):
     Базовый класс состояния.
     Объявляет методы, которые реализуют конкретные состояния,
     а также предоставляет ссылку на объект контекст связанный
-    с сотоянием.
+    с состоянием.
     """
 
     @property
@@ -74,7 +74,7 @@ class State(ABC):
     @context.setter
     def context(self, context: Context):
         """
-        Устанавливает контекс
+        Устанавливает контекст
         :param context:
         :return:
         """
@@ -125,13 +125,18 @@ class StateOrder(State):
     """
 
     def handle_action(self):
+        cart = dict()
         answer = ''
         while answer != 'n':
-            answer = input('ID позиции, количество')
+            answer = input('ID позиции количество')
             if answer == 'n':
                 break
             item, quantity = map(int, answer.split())
-            print(f'Заказано: {item} {quantity} штук')
+            cart[item] = quantity
+        for key, value in cart.items():
+            print(f'Заказано: {key} {value} штук')
+            # добавить в корзину товар
+
         self.context.transition_to(StateOrdered())
 
 
@@ -141,13 +146,15 @@ class StateOrdered(State):
     """
 
     def handle_action(self):
-        point = int(input(f'\n1-Дозаказать товар\n2-Посмотреть каталог\n3-Вернуться в начало\n'))
+        point = int(input(f'\n1-Дозаказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
         match point:
             case 1:
                 self.context.transition_to(StateOrder())
             case 2:
                 self.context.transition_to(StateCatalog())
             case 3:
+                self.context.transition_to(StateDelivery())
+            case 4:
                 self.context.transition_to(StateStart())
 
 
@@ -159,12 +166,46 @@ class StateCatalog(State):
     def handle_action(self):
         print('Показываем каталог')
         for item in range(5):
-            print(f'Товар{item}')
+            print(f'Товар {item}')
         point = int(input(f'\n1-Заказать товар\n2-Вернуться в начало\n'))
         match point:
             case 1:
                 self.context.transition_to(StateOrder())
             case 2:
                 self.context.transition_to(StateStart())
+            case 3:
+                pass
+
+
+class StateDelivery(State):
+    """
+    Состояние Запрос склада
+    """
+
+    def handle_action(self):
+        print('Ждем подтверждения от склада')
+        point = int(input(f'\n1-Забрать товар\n2-Изменить заказ\n'))
+        match point:
+            case 1:
+                self.context.transition_to(StateDelivered())
+            case 2:
+                self.context.transition_to(StateOrder())
+            case 3:
+                pass
+
+
+class StateDelivered(State):
+    """
+    Состояние Запрос склада
+    """
+
+    def handle_action(self):
+        print('Товар выдан')
+        point = int(input(f'\n1-Перейти в начало\n2-Завершение работы\n'))
+        match point:
+            case 1:
+                self.context.transition_to(StateStart())
+            case 2:
+                self.context.transition_to(StateEnd())
             case 3:
                 pass
