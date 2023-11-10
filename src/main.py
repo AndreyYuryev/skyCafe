@@ -1,5 +1,5 @@
 """ Точка входа для проекта """
-from src.state import Context, StateStart, StateEnd, StateOrder, StateCatalog
+from src.state import Context, StateStart, StateEnd
 
 
 def main():
