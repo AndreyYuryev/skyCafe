@@ -7,6 +7,7 @@
 from __future__ import annotations
 # позволяет использовать описание классов определенных ниже
 from abc import ABC, abstractmethod
+import PySimpleGUI as Sg
 
 
 class Context:
@@ -81,10 +82,12 @@ class State(ABC):
         self.__context = context
 
     def handle_welcome(self):
-        print('Добро пожаловать в наше кафе!')
+        """ Приветственное действие """
+        Sg.popup('Добро пожаловать в наше кафе!')
 
     def handle_goodbye(self):
-        print('До свидания. Ждем вас в нашем кафе!')
+        """ Прощальное окно """
+        Sg.popup('До свидания. Ждем вас в нашем кафе!')
 
     @abstractmethod
     def handle_action(self):
@@ -100,6 +103,8 @@ class StateStart(State):
     """
 
     def handle_action(self):
+
+
         point = int(input(f'\n1-Сделать заказ\n2-Посмотреть каталог\n3-Завершение работы\n'))
         match point:
             case 1:
@@ -146,7 +151,7 @@ class StateOrdered(State):
     """
 
     def handle_action(self):
-        point = int(input(f'\n1-Дозаказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
+        point = int(input(f'\n1-Заказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
         match point:
             case 1:
                 self.context.transition_to(StateOrder())
