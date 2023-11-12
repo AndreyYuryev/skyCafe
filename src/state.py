@@ -21,7 +21,6 @@ class Context:
 
     def __init__(self, state: State):
         self.transition_to(state)
-
         self.layout_1 = [[Sg.Frame('Начальный экран', layout=[[Sg.Text('Выберите действие', key='-OUTPUT1-')]])]]
         self.layout_2 = [[Sg.Frame('Каталог товаров', layout=[[Sg.Text('Товары', key='-OUTPUT1-')]])]]
         self.layout_button_1 = [
@@ -136,6 +135,7 @@ class StateStart(State):
         #         self.context.transition_to(StateEnd())
 
 
+
 class StateEnd(State):
     """
     Завершение
@@ -172,7 +172,7 @@ class StateOrdered(State):
     """
 
     def handle_action(self):
-        point = int(input(f'\n1-Заказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
+        point = int(input(f'\n1-Дозаказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
         match point:
             case 1:
                 self.context.transition_to(StateOrder())
