@@ -22,6 +22,17 @@ class Context:
     def __init__(self, state: State):
         self.transition_to(state)
 
+        self.layout_1 = [[Sg.Text('Выберите действие', key='-OUTPUT1-')]]
+        self.layout_2 = [[Sg.Text('Товары', key='-OUTPUT1-')]]
+        self.layout_button_1 = [
+            [Sg.Button('Начало', key='-START-', visible=False, size=10),
+             Sg.Button('Каталог', key='-CATALOG-', visible=True, size=10)]]
+        self.layout_button_2 = [[Sg.Button('Завершить', key='-EXIT-')]]
+        self.layout = [[Sg.Column(self.layout_1, key='-COL1-'), Sg.Column(self.layout_2, visible=False, key='-COL2-')],
+                       [Sg.Column(self.layout_button_1, key='-BT1-'), Sg.Column(self.layout_button_2, key='-BT2-')]]
+
+        self.window = Sg.Window('CkyCafe', self.layout, size=(400, 400))
+
     def transition_to(self, state: State):
         """
         Изменение состояния.
@@ -103,16 +114,26 @@ class StateStart(State):
     """
 
     def handle_action(self):
-
-
-        point = int(input(f'\n1-Сделать заказ\n2-Посмотреть каталог\n3-Завершение работы\n'))
-        match point:
-            case 1:
-                self.context.transition_to(StateOrder())
-            case 2:
-                self.context.transition_to(StateCatalog())
-            case 3:
-                self.context.transition_to(StateEnd())
+        event, values = self.context.window.read()
+        print(event, values)
+        if event == Sg.WIN_CLOSED or event == '-EXIT-':
+            self.context.window.close()
+            self.context.transition_to(StateEnd())
+        elif event == '-CATALOG-':
+            # self.context.window['-OUTPUT2-'].update(values['-IN1-'])
+            self.context.window['-CATALOG-'].update(visible=False)
+            self.context.window['-START-'].update(visible=True)
+            self.context.window['-COL1-'].update(visible=False)
+            self.context.window['-COL2-'].update(visible=True)
+            self.context.transition_to(StateCatalog())
+        # point = int(input(f'\n1-Сделать заказ\n2-Посмотреть каталог\n3-Завершение работы\n'))
+        # match point:
+        #     case 1:
+        #         self.context.transition_to(StateOrder())
+        #     case 2:
+        #         self.context.transition_to(StateCatalog())
+        #     case 3:
+        #         self.context.transition_to(StateEnd())
 
 
 class StateEnd(State):
@@ -169,17 +190,28 @@ class StateCatalog(State):
     """
 
     def handle_action(self):
-        print('Показываем каталог')
-        for item in range(5):
-            print(f'Товар {item}')
-        point = int(input(f'\n1-Заказать товар\n2-Вернуться в начало\n'))
-        match point:
-            case 1:
-                self.context.transition_to(StateOrder())
-            case 2:
-                self.context.transition_to(StateStart())
-            case 3:
-                pass
+        event, values = self.context.window.read()
+        print(event, values)
+        if event == Sg.WIN_CLOSED or event == '-EXIT-':
+            self.context.window.close()
+            self.context.transition_to(StateEnd())
+        elif event == '-START-':
+            self.context.window['-CATALOG-'].update(visible=True)
+            self.context.window['-START-'].update(visible=False)
+            self.context.window['-COL2-'].update(visible=False)
+            self.context.window['-COL1-'].update(visible=True)
+            self.context.transition_to(StateStart())
+        # print('Показываем каталог')
+        # for item in range(5):
+        #     print(f'Товар {item}')
+        # point = int(input(f'\n1-Заказать товар\n2-Вернуться в начало\n'))
+        # match point:
+        #     case 1:
+        #         self.context.transition_to(StateOrder())
+        #     case 2:
+        #         self.context.transition_to(StateStart())
+        #     case 3:
+        #         pass
 
 
 class StateDelivery(State):
