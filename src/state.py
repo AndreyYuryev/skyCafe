@@ -22,8 +22,8 @@ class Context:
     def __init__(self, state: State):
         self.transition_to(state)
 
-        self.layout_1 = [[Sg.Text('Выберите действие', key='-OUTPUT1-')]]
-        self.layout_2 = [[Sg.Text('Товары', key='-OUTPUT1-')]]
+        self.layout_1 = [[Sg.Frame('Начальный экран', layout=[[Sg.Text('Выберите действие', key='-OUTPUT1-')]])]]
+        self.layout_2 = [[Sg.Frame('Каталог товаров', layout=[[Sg.Text('Товары', key='-OUTPUT1-')]])]]
         self.layout_button_1 = [
             [Sg.Button('Начало', key='-START-', visible=False, size=10),
              Sg.Button('Каталог', key='-CATALOG-', visible=True, size=10)]]
