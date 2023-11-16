@@ -1,36 +1,29 @@
 from src.stock import Stock
+from uuid import uuid4
 
 
 class Product:
-    def __init__(self, name, quantity, price):
+    def __init__(self, name, price):
+        self.id = str(uuid4())
         self.name = name
-        self.quantity = quantity
         self.price = price
+        self.add_to_stock()
 
     def __repr__(self):
-        return f"Name: {self.name}\nQuantity: {self.quantity}\nPrice: {self.price}"
+        return f"Product({self.id}, {self.name}, {self.price})"
 
     def __str__(self):
-        return f"Name: {self.name}\nQuantity: {self.quantity}\nPrice: {self.price}"
+        return f"Product({self.id}, {self.name}, {self.price})"
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
-            "quantity": self.quantity,
             "price": self.price
         }
 
-    def add_quantity(self, quantity):
-        """
-        Добавить количество товара
-        """
-        self.quantity += quantity
-
-    def remove_quantity(self, quantity):
-        """
-        Удалить количество товара
-        """
-        self.quantity -= quantity
+    def add_to_stock(self):
+        Stock.add_product(self.to_dict())
 
 
 class Meat(Product):
@@ -38,8 +31,8 @@ class Meat(Product):
     Класс "Мясо"
     """
 
-    def __init__(self, name, quantity, price):
-        super().__init__(name, quantity, price)
+    def __init__(self, name, price):
+        super().__init__(name, price)
 
 
 class Fish(Product):
@@ -47,8 +40,8 @@ class Fish(Product):
     Класс "Рыба"
     """
 
-    def __init__(self, name, quantity, price):
-        super().__init__(name, quantity, price)
+    def __init__(self, name, price):
+        super().__init__(name, price)
 
 
 class Vegetables(Product):
@@ -56,18 +49,5 @@ class Vegetables(Product):
     Класс "Овощи"
     """
 
-    def __init__(self, name, quantity, price):
-        super().__init__(name, quantity, price)
-
-
-cow_meat = Meat("Говядина", 10, 100)
-golden_fish = Fish("Золотая рыбка", 10, 100)
-tomato = Vegetables("Томат", 10, 100)
-
-for product in [cow_meat, golden_fish, tomato]:
-    Stock.add_product(product.to_dict())
-
-for product in Stock.products:
-    for key, value in product.items():
-        print(f"{key}: {value}")
-    print()
+    def __init__(self, name, price):
+        super().__init__(name, price)

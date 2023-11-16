@@ -14,14 +14,37 @@ class Stock:
         pass
 
     @classmethod
-    def add_product(cls, product):
+    def is_product_in_stock(cls, product):
+        """
+        Проверить наличие продукта в наличии:
+        """
+        return product in cls.products
+
+    @classmethod
+    def add_product(cls, product, quantity=0):
         """
         Добавить продукт:
         """
+        product["quantity"] = quantity
         cls.products.append(product)
 
-    def remove_product(self, product):
+    @classmethod
+    def remove_product(cls, product):
         """
         Удалить продукт:
         """
-        self.products.remove(product)
+        cls.products.remove(product)
+
+    @classmethod
+    def add_quantity(cls, product, quantity):
+        """
+        Увеличить количество продукта:
+        """
+        cls.products[product]["quantity"] += quantity
+
+    @classmethod
+    def remove_quantity(cls, product, quantity):
+        """
+        Уменьшить количество продукта:
+        """
+        product["quantity"] -= quantity
