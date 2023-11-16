@@ -21,16 +21,49 @@ class Context:
 
     def __init__(self, state: State):
         self.transition_to(state)
-        self.layout_1 = [[Sg.Frame('Начальный экран', layout=[[Sg.Text('Выберите действие', key='-OUTPUT1-')]])]]
-        self.layout_2 = [[Sg.Frame('Каталог товаров', layout=[[Sg.Text('Товары', key='-OUTPUT1-')]])]]
-        self.layout_button_1 = [
-            [Sg.Button('Начало', key='-START-', visible=False, size=10),
-             Sg.Button('Каталог', key='-CATALOG-', visible=True, size=10)]]
-        self.layout_button_2 = [[Sg.Button('Завершить', key='-EXIT-')]]
-        self.layout = [[Sg.Column(self.layout_1, key='-COL1-'), Sg.Column(self.layout_2, visible=False, key='-COL2-')],
-                       [Sg.Column(self.layout_button_1, key='-BT1-'), Sg.Column(self.layout_button_2, key='-BT2-')]]
 
-        self.window = Sg.Window('CkyCafe', self.layout, size=(400, 400))
+        self.lazy_load()
+
+        self.layout_main = [[Sg.Frame('Главное меню',
+                                      layout=[[Sg.Button('Завершить', key='-EXIT-', size=15),
+                                               Sg.Button('Стартовое меню', key='-START-', size=15)]])]]
+
+        self.layout_mode = [[Sg.Button('Каталог товаров', key='-CATALOG-', visible=True, size=15),
+                             Sg.Button('Склад', key='-STOCK-', visible=True, size=15),
+                             Sg.Button('Заказ', key='-ORDER-', visible=True, size=15)]]
+
+        self.layout_frame_mode = [[Sg.Frame('Режим работы', layout=self.layout_mode)]]
+
+        item_list_c = ['Товар А', 'Товар B', 'Товар C']
+        item_list_s = ['Товар А', 'Товар B', 'Товар C']
+        item_list_o = ['Товар А', 'Товар B', 'Товар C']
+
+        self.layout_lbc = [
+            [Sg.Listbox(item_list_c, key='-LBC-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Button('Выбрать', key='-LBCS-')]]
+        self.layout_lbs = [
+            [Sg.Listbox(item_list_s, key='-LBS-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Button('Выбрать', key='-LBSS-')]]
+        self.layout_lbo = [
+            [Sg.Listbox(item_list_o, key='-LBO-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Button('Выбрать', key='-LBOS-')]]
+
+        self.layout_catalog = [[Sg.Frame('Каталог товаров', layout=self.layout_lbc)]]
+        self.layout_stock = [[Sg.Frame('Склад', layout=self.layout_lbs)]]
+        self.layout_order = [[Sg.Frame('Заказ', layout=self.layout_lbo)]]
+
+        # set layout
+        self.layout = [[Sg.Column(self.layout_main)],
+                       [Sg.Column(self.layout_frame_mode)],
+                       [Sg.Column(self.layout_catalog, visible=False, key='-COLC-'),
+                        Sg.Column(self.layout_stock, visible=False, key='-COLS-'),
+                        Sg.Column(self.layout_order, visible=False, key='-COLO-')]]
+        # run window
+        self.window = Sg.Window('CkyCafe', self.layout, size=(800, 600))
+
+    def lazy_load(self):
+        """ Загрузка данных в модель """
+        pass
 
     def transition_to(self, state: State):
         """
@@ -115,25 +148,26 @@ class StateStart(State):
     def handle_action(self):
         event, values = self.context.window.read()
         print(event, values)
+
         if event == Sg.WIN_CLOSED or event == '-EXIT-':
             self.context.window.close()
             self.context.transition_to(StateEnd())
         elif event == '-CATALOG-':
-            # self.context.window['-OUTPUT2-'].update(values['-IN1-'])
-            self.context.window['-CATALOG-'].update(visible=False)
-            self.context.window['-START-'].update(visible=True)
-            self.context.window['-COL1-'].update(visible=False)
-            self.context.window['-COL2-'].update(visible=True)
+            self.context.window['-COLC-'].update(visible=True)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            # self.context.window['-COL2-'].update(visible=True)
             self.context.transition_to(StateCatalog())
-        # point = int(input(f'\n1-Сделать заказ\n2-Посмотреть каталог\n3-Завершение работы\n'))
-        # match point:
-        #     case 1:
-        #         self.context.transition_to(StateOrder())
-        #     case 2:
-        #         self.context.transition_to(StateCatalog())
-        #     case 3:
-        #         self.context.transition_to(StateEnd())
-
+        elif event == '-STOCK-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=True)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStock())
+        elif event == '-ORDER-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=True)
+            self.context.transition_to(StateOrder())
 
 
 class StateEnd(State):
@@ -145,45 +179,6 @@ class StateEnd(State):
         pass
 
 
-class StateOrder(State):
-    """
-    Состояние Процесс заказа
-    """
-
-    def handle_action(self):
-        cart = dict()
-        answer = ''
-        while answer != 'n':
-            answer = input('ID позиции количество')
-            if answer == 'n':
-                break
-            item, quantity = map(int, answer.split())
-            cart[item] = quantity
-        for key, value in cart.items():
-            print(f'Заказано: {key} {value} штук')
-            # добавить в корзину товар
-
-        self.context.transition_to(StateOrdered())
-
-
-class StateOrdered(State):
-    """
-    Состояние Заказано
-    """
-
-    def handle_action(self):
-        point = int(input(f'\n1-Дозаказать товар\n2-Посмотреть каталог\n3-Запросить склад\n4-Вернуться в начало\n'))
-        match point:
-            case 1:
-                self.context.transition_to(StateOrder())
-            case 2:
-                self.context.transition_to(StateCatalog())
-            case 3:
-                self.context.transition_to(StateDelivery())
-            case 4:
-                self.context.transition_to(StateStart())
-
-
 class StateCatalog(State):
     """
     Состояние Каталог
@@ -192,57 +187,98 @@ class StateCatalog(State):
     def handle_action(self):
         event, values = self.context.window.read()
         print(event, values)
+
         if event == Sg.WIN_CLOSED or event == '-EXIT-':
             self.context.window.close()
             self.context.transition_to(StateEnd())
         elif event == '-START-':
-            self.context.window['-CATALOG-'].update(visible=True)
-            self.context.window['-START-'].update(visible=False)
-            self.context.window['-COL2-'].update(visible=False)
-            self.context.window['-COL1-'].update(visible=True)
+            # self.context.window['-CATALOG-'].update(visible=True)
+            # self.context.window['-START-'].update(visible=False)
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
             self.context.transition_to(StateStart())
-        # print('Показываем каталог')
-        # for item in range(5):
-        #     print(f'Товар {item}')
-        # point = int(input(f'\n1-Заказать товар\n2-Вернуться в начало\n'))
-        # match point:
-        #     case 1:
-        #         self.context.transition_to(StateOrder())
-        #     case 2:
-        #         self.context.transition_to(StateStart())
-        #     case 3:
-        #         pass
+        elif event == '-CATALOG-':
+            self.context.window['-COLC-'].update(visible=True)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            # self.context.window['-COL2-'].update(visible=True)
+            self.context.transition_to(StateCatalog())
+        elif event == '-STOCK-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=True)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStock())
+        elif event == '-ORDER-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=True)
+            self.context.transition_to(StateOrder())
 
 
-class StateDelivery(State):
-    """
-    Состояние Запрос склада
-    """
-
-    def handle_action(self):
-        print('Ждем подтверждения от склада')
-        point = int(input(f'\n1-Забрать товар\n2-Изменить заказ\n'))
-        match point:
-            case 1:
-                self.context.transition_to(StateDelivered())
-            case 2:
-                self.context.transition_to(StateOrder())
-            case 3:
-                pass
-
-
-class StateDelivered(State):
-    """
-    Состояние Запрос склада
-    """
+class StateStock(State):
+    """ Состояние склад/запасы """
 
     def handle_action(self):
-        print('Товар выдан')
-        point = int(input(f'\n1-Перейти в начало\n2-Завершение работы\n'))
-        match point:
-            case 1:
-                self.context.transition_to(StateStart())
-            case 2:
-                self.context.transition_to(StateEnd())
-            case 3:
-                pass
+        event, values = self.context.window.read()
+        print(event, values)
+        if event == Sg.WIN_CLOSED or event == '-EXIT-':
+            self.context.window.close()
+            self.context.transition_to(StateEnd())
+        elif event == '-START-':
+            # self.context.window['-CATALOG-'].update(visible=True)
+            # self.context.window['-START-'].update(visible=False)
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStart())
+        elif event == '-CATALOG-':
+            self.context.window['-COLC-'].update(visible=True)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            # self.context.window['-COL2-'].update(visible=True)
+            self.context.transition_to(StateCatalog())
+        elif event == '-STOCK-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=True)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStock())
+        elif event == '-ORDER-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=True)
+            self.context.transition_to(StateOrder())
+
+
+class StateOrder(State):
+    """ Состояние заказ """
+
+    def handle_action(self):
+        event, values = self.context.window.read()
+        print(event, values)
+        if event == Sg.WIN_CLOSED or event == '-EXIT-':
+            self.context.window.close()
+            self.context.transition_to(StateEnd())
+        elif event == '-START-':
+            # self.context.window['-CATALOG-'].update(visible=True)
+            # self.context.window['-START-'].update(visible=False)
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStart())
+        elif event == '-CATALOG-':
+            self.context.window['-COLC-'].update(visible=True)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=False)
+            # self.context.window['-COL2-'].update(visible=True)
+            self.context.transition_to(StateCatalog())
+        elif event == '-STOCK-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=True)
+            self.context.window['-COLO-'].update(visible=False)
+            self.context.transition_to(StateStock())
+        elif event == '-ORDER-':
+            self.context.window['-COLC-'].update(visible=False)
+            self.context.window['-COLS-'].update(visible=False)
+            self.context.window['-COLO-'].update(visible=True)
+            self.context.transition_to(StateOrder())
