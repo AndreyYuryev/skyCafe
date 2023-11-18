@@ -8,6 +8,8 @@ from __future__ import annotations
 # позволяет использовать описание классов определенных ниже
 from abc import ABC, abstractmethod
 import PySimpleGUI as Sg
+from src.products import Product
+from src.order import Order
 
 
 class Context:
@@ -20,6 +22,10 @@ class Context:
     __state = None
 
     def __init__(self, state: State):
+        self.item_list_c = []
+        self.item_list_s = []
+        self.item_list_o = []
+
         self.transition_to(state)
 
         self.lazy_load()
@@ -34,36 +40,46 @@ class Context:
 
         self.layout_frame_mode = [[Sg.Frame('Режим работы', layout=self.layout_mode)]]
 
-        item_list_c = ['Товар А', 'Товар B', 'Товар C']
-        item_list_s = ['Товар А', 'Товар B', 'Товар C']
-        item_list_o = ['Товар А', 'Товар B', 'Товар C']
-
         self.layout_lbc = [
-            [Sg.Listbox(item_list_c, key='-LBC-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_c, key='-LBC-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBCS-')]]
         self.layout_lbs = [
-            [Sg.Listbox(item_list_s, key='-LBS-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_s, key='-LBS-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBSS-')]]
         self.layout_lbo = [
-            [Sg.Listbox(item_list_o, key='-LBO-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_o, key='-LBO-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBOS-')]]
 
         self.layout_catalog = [[Sg.Frame('Каталог товаров', layout=self.layout_lbc)]]
         self.layout_stock = [[Sg.Frame('Склад', layout=self.layout_lbs)]]
         self.layout_order = [[Sg.Frame('Заказ', layout=self.layout_lbo)]]
+        self.layout_output = [[Sg.T('Консоль вывода')], [Sg.Output(s=(800,10))]]
 
         # set layout
         self.layout = [[Sg.Column(self.layout_main)],
                        [Sg.Column(self.layout_frame_mode)],
                        [Sg.Column(self.layout_catalog, visible=False, key='-COLC-'),
                         Sg.Column(self.layout_stock, visible=False, key='-COLS-'),
-                        Sg.Column(self.layout_order, visible=False, key='-COLO-')]]
+                        Sg.Column(self.layout_order, visible=False, key='-COLO-')],
+                       [Sg.Column(self.layout_output, visible=True)]]
         # run window
         self.window = Sg.Window('CkyCafe', self.layout, size=(800, 600))
 
     def lazy_load(self):
         """ Загрузка данных в модель """
-        pass
+        # загрузить из файлов в модель
+
+        # получить данные из модели
+        for itm in range(5):
+            item = Product(f'Product {itm}', 10)
+            self.item_list_c.append(item)
+
+        self.item_list_s = ['Товар А', 'Товар B', 'Товар C']
+        # item_list_o = ['Товар А', 'Товар B', 'Товар C']
+
+        for itm_o in range(5):
+            order = Order()
+            self.item_list_o.append(order)
 
     def transition_to(self, state: State):
         """
@@ -192,18 +208,16 @@ class StateCatalog(State):
             self.context.window.close()
             self.context.transition_to(StateEnd())
         elif event == '-START-':
-            # self.context.window['-CATALOG-'].update(visible=True)
-            # self.context.window['-START-'].update(visible=False)
             self.context.window['-COLC-'].update(visible=False)
             self.context.window['-COLS-'].update(visible=False)
             self.context.window['-COLO-'].update(visible=False)
             self.context.transition_to(StateStart())
-        elif event == '-CATALOG-':
-            self.context.window['-COLC-'].update(visible=True)
-            self.context.window['-COLS-'].update(visible=False)
-            self.context.window['-COLO-'].update(visible=False)
-            # self.context.window['-COL2-'].update(visible=True)
-            self.context.transition_to(StateCatalog())
+        # elif event == '-CATALOG-':
+        #     self.context.window['-COLC-'].update(visible=True)
+        #     self.context.window['-COLS-'].update(visible=False)
+        #     self.context.window['-COLO-'].update(visible=False)
+        #     # self.context.window['-COL2-'].update(visible=True)
+        #     self.context.transition_to(StateCatalog())
         elif event == '-STOCK-':
             self.context.window['-COLC-'].update(visible=False)
             self.context.window['-COLS-'].update(visible=True)
@@ -214,6 +228,10 @@ class StateCatalog(State):
             self.context.window['-COLS-'].update(visible=False)
             self.context.window['-COLO-'].update(visible=True)
             self.context.transition_to(StateOrder())
+        elif event == '-LBCS-':
+            print('Описание')
+            for itm in values['-LBC-']:
+                print(itm.name)
 
 
 class StateStock(State):
@@ -226,8 +244,6 @@ class StateStock(State):
             self.context.window.close()
             self.context.transition_to(StateEnd())
         elif event == '-START-':
-            # self.context.window['-CATALOG-'].update(visible=True)
-            # self.context.window['-START-'].update(visible=False)
             self.context.window['-COLC-'].update(visible=False)
             self.context.window['-COLS-'].update(visible=False)
             self.context.window['-COLO-'].update(visible=False)
@@ -238,16 +254,20 @@ class StateStock(State):
             self.context.window['-COLO-'].update(visible=False)
             # self.context.window['-COL2-'].update(visible=True)
             self.context.transition_to(StateCatalog())
-        elif event == '-STOCK-':
-            self.context.window['-COLC-'].update(visible=False)
-            self.context.window['-COLS-'].update(visible=True)
-            self.context.window['-COLO-'].update(visible=False)
-            self.context.transition_to(StateStock())
+        # elif event == '-STOCK-':
+        #     self.context.window['-COLC-'].update(visible=False)
+        #     self.context.window['-COLS-'].update(visible=True)
+        #     self.context.window['-COLO-'].update(visible=False)
+        #     self.context.transition_to(StateStock())
         elif event == '-ORDER-':
             self.context.window['-COLC-'].update(visible=False)
             self.context.window['-COLS-'].update(visible=False)
             self.context.window['-COLO-'].update(visible=True)
             self.context.transition_to(StateOrder())
+        elif event == '-LBSS-':
+            print('Описание')
+            for itm in values['-LBS-']:
+                print(itm)
 
 
 class StateOrder(State):
@@ -282,3 +302,7 @@ class StateOrder(State):
             self.context.window['-COLS-'].update(visible=False)
             self.context.window['-COLO-'].update(visible=True)
             self.context.transition_to(StateOrder())
+        elif event == '-LBOS-':
+            print('Описание')
+            for itm in values['-LBO-']:
+                print(itm.title)
