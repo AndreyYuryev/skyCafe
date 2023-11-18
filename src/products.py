@@ -3,27 +3,68 @@ from uuid import uuid4
 
 
 class Product:
-    def __init__(self, name, price):
-        self.id = str(uuid4())
+    __last_product_number = 0
+
+    def __init__(self, name, price, product_id=0):
+        if product_id == 0:
+            self.product_id = Product.__new_number()
+        else:
+            self.product_id = product_id
+            if Product.__last_product_number < product_id:
+                Product.__last_product_number = product_id
         self.name = name
         self.price = price
-        self.add_to_stock()
 
     def __repr__(self):
-        return f"Product({self.id}, {self.name}, {self.price})"
+        return f"Product({self.product_id}, {self.name}, {self.price})"
 
     def __str__(self):
-        return f"Product({self.id}, {self.name}, {self.price})"
+        return f"Наименование: {self.name} Идентификатор: {self.product_id}"
 
     def to_dict(self):
         return {
-            "id": self.id,
+            "product_id": self.product_id,
             "name": self.name,
             "price": self.price
         }
 
-    def add_to_stock(self):
-        Stock.add_product(self.to_dict())
+    @classmethod
+    def __new_number(cls):
+        """
+        Получить следующий номер продукта.
+        Если будет история продуктов считать последний номер
+        заказа и присвоить last_product_number
+        :return:
+        """
+        cls.__last_product_number += 1
+        return cls.__last_product_number
+
+    @classmethod
+    def clear_numbers(cls):
+        cls.__last_product_number = 0
+
+
+class ProductFactory:
+    def __init__(self):
+        """ Хранилище информации о продуктах """
+        self.products = []
+        Product.clear_numbers()
+
+    def add_product(self, product: Product):
+        """ Добавить продукт в хранилище """
+        self.products.append(product)
+
+    def upload_products(self, product_list=[]):
+        """ Добавить продукты из словаря в хранилище """
+        for item in product_list:
+            product = Product(name=item['name'], price=item['price'], product_id=item['product_id'])
+            self.add_product(product)
+
+    def get_product_by_id(self, product_id):
+        """ Вернуть продукт по ID """
+        for item in self.products:
+            if item.product_id == product_id:
+                return item
 
 
 class Meat(Product):
