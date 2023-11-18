@@ -9,6 +9,7 @@ class Order:
 
     def __init__(self):
         self.__number = Order.__new_number()
+        self.title = f'Заказ {self.__number} с описанием'
         self.__items = {}
 
     @classmethod
@@ -47,4 +48,8 @@ class Order:
     def number(self):
         """ Вернуть номер заказа """
         return self.__number
+
+    def __str__(self):
+        """ Текстовое представление """
+        return f'Заказ {self.__number}'
 
