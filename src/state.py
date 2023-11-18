@@ -9,6 +9,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 import PySimpleGUI as Sg
 from src.products import Product, ProductFactory
+from src.stock import Stock
 from src.order import Order
 
 
@@ -77,12 +78,13 @@ class Context:
         product_factory.add_product(Product(name='Product 3', price=103, product_id=5))
         product_factory.add_product(Product(name='Product 4', price=104))
         self.item_list_c.extend(product_factory.products)
-        # for itm in range(5):
-        #     item = Product(f'Product {itm}', 10)
-        #     self.item_list_c.append(item)
 
-        self.item_list_s = ['Товар А', 'Товар B', 'Товар C']
-        # item_list_o = ['Товар А', 'Товар B', 'Товар C']
+        stock = Stock()
+        stock.add_product(product=product_factory.get_product_by_id(1), quantity=10)
+        stock.add_product(product=product_factory.get_product_by_id(2), quantity=3)
+        stock.add_product(product=product_factory.get_product_by_id(5))
+        self.item_list_s.extend(stock.products)
+
 
         for itm_o in range(5):
             order = Order()
@@ -272,9 +274,9 @@ class StateStock(State):
             self.context.window['-COLO-'].update(visible=True)
             self.context.transition_to(StateOrder())
         elif event == '-LBSS-':
-            print('Описание')
+            print('Идентификатор и количество')
             for itm in values['-LBS-']:
-                print(itm)
+                print(itm.product_id, itm.quantity)
 
 
 class StateOrder(State):
