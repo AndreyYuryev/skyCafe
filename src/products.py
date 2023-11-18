@@ -41,6 +41,7 @@ class Product:
 
     @classmethod
     def clear_numbers(cls):
+        """ Очистка счетчика номера продуктов """
         cls.__last_product_number = 0
 
 

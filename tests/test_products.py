@@ -47,6 +47,7 @@ def test_product_factory():
 
 
 def test_upload_product_factory():
+    Product.clear_numbers()
     product1 = Product(name='Product 1', price=101)
     product2 = Product(name='Product 2', price=102)
     product3 = Product(name='Product 3', price=103, product_id=5)
@@ -60,3 +61,18 @@ def test_upload_product_factory():
     products.append(product4.to_dict())
     product_factory.upload_products(product_list=products)
     assert len(product_factory.products) == 4
+
+
+def test_get_product():
+    Product.clear_numbers()
+    product1 = Product(name='Product 1', price=101)
+    product2 = Product(name='Product 2', price=102)
+    product3 = Product(name='Product 3', price=103, product_id=5)
+    product4 = Product(name='Product 4', price=104)
+    product_factory = ProductFactory()
+    product_factory.add_product(product1)
+    product_factory.add_product(product2)
+    product_factory.add_product(product3)
+    product_factory.add_product(product4)
+    assert product_factory.get_product_by_id(1) == product1
+    assert product_factory.get_product_by_id(6) == product4
