@@ -8,8 +8,9 @@ from __future__ import annotations
 # позволяет использовать описание классов определенных ниже
 from abc import ABC, abstractmethod
 import PySimpleGUI as Sg
-from src.products import Product
+from src.products import Product, ProductFactory
 from src.order import Order
+
 
 
 class Context:
@@ -41,19 +42,19 @@ class Context:
         self.layout_frame_mode = [[Sg.Frame('Режим работы', layout=self.layout_mode)]]
 
         self.layout_lbc = [
-            [Sg.Listbox(self.item_list_c, key='-LBC-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_c, key='-LBC-', s=(80, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBCS-')]]
         self.layout_lbs = [
-            [Sg.Listbox(self.item_list_s, key='-LBS-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_s, key='-LBS-', s=(80, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBSS-')]]
         self.layout_lbo = [
-            [Sg.Listbox(self.item_list_o, key='-LBO-', s=(25, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
+            [Sg.Listbox(self.item_list_o, key='-LBO-', s=(80, 10), select_mode=Sg.LISTBOX_SELECT_MODE_EXTENDED)],
             [Sg.Button('Выбрать', key='-LBOS-')]]
 
         self.layout_catalog = [[Sg.Frame('Каталог товаров', layout=self.layout_lbc)]]
         self.layout_stock = [[Sg.Frame('Склад', layout=self.layout_lbs)]]
         self.layout_order = [[Sg.Frame('Заказ', layout=self.layout_lbo)]]
-        self.layout_output = [[Sg.T('Консоль вывода')], [Sg.Output(s=(800,10))]]
+        self.layout_output = [[Sg.T('Консоль вывода')], [Sg.Output(s=(100,10))]]
 
         # set layout
         self.layout = [[Sg.Column(self.layout_main)],
@@ -70,9 +71,15 @@ class Context:
         # загрузить из файлов в модель
 
         # получить данные из модели
-        for itm in range(5):
-            item = Product(f'Product {itm}', 10)
-            self.item_list_c.append(item)
+        product_factory = ProductFactory()
+        product_factory.add_product(Product(name='Product 1', price=101))
+        product_factory.add_product(Product(name='Product 2', price=102))
+        product_factory.add_product(Product(name='Product 3', price=103, product_id=5))
+        product_factory.add_product(Product(name='Product 4', price=104))
+        self.item_list_c.extend(product_factory.products)
+        # for itm in range(5):
+        #     item = Product(f'Product {itm}', 10)
+        #     self.item_list_c.append(item)
 
         self.item_list_s = ['Товар А', 'Товар B', 'Товар C']
         # item_list_o = ['Товар А', 'Товар B', 'Товар C']
@@ -229,9 +236,9 @@ class StateCatalog(State):
             self.context.window['-COLO-'].update(visible=True)
             self.context.transition_to(StateOrder())
         elif event == '-LBCS-':
-            print('Описание')
+            print('Идентификаторы')
             for itm in values['-LBC-']:
-                print(itm.name)
+                print(itm.product_id)
 
 
 class StateStock(State):
