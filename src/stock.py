@@ -1,3 +1,13 @@
+class StockItem:
+    def __init__(self, product_id, name, quantity=0):
+        self.product_id = product_id
+        self.name = name
+        self.quantity = quantity
+
+    def __str__(self):
+        return f'Наименование {self.name} количество: {self.quantity}'
+
+
 class Stock:
     """
     Класс для хранения склада
@@ -13,27 +23,34 @@ class Stock:
     def __repr__(self):
         pass
 
-    @classmethod
-    def is_product_in_stock(cls, product):
+    def is_product_in_stock(self, product):
         """
         Проверить наличие продукта в наличии:
         """
-        return product in cls.products
+        for item in self.products:
+            if item.product_id == product.product_id:
+                return True
+        return False
 
-    @classmethod
-    def add_product(cls, product, quantity=0):
+    def add_product(self, product, quantity=0):
         """
         Добавить продукт:
         """
-        product["quantity"] = quantity
-        cls.products.append(product)
+        self.products.append(StockItem(product_id=product.product_id, name=product.name, quantity=quantity))
 
-    @classmethod
-    def remove_product(cls, product):
+    def remove_product(self, product):
         """
         Удалить продукт:
         """
-        cls.products.remove(product)
+        for item in self.products:
+            if product.product_id == item.product_id:
+                del item
+
+    def get_quantity(self, product):
+        """ Вернуть количество продукта """
+        for item in self.products:
+            if product.product_id == item.product_id:
+                return item.quantity
 
     @classmethod
     def add_quantity(cls, product, quantity):
