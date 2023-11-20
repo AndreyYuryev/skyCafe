@@ -1,78 +1,43 @@
-from src.products import Product, ProductFactory
+from src.products import Product
 
 
-def test_product():
+def test_create_product():
     Product.clear_numbers()
-    product = Product("test", 100)
-    assert product.name == "test"
-    assert product.price == 100
-
-    product.price = 200
-    assert product.price == 200
+    product = Product(name='Product 1')
+    assert product.name == 'Product 1'
 
 
 def test_new_product():
     Product.clear_numbers()
-    product1 = Product(name='Product 1', price=101)
-    product2 = Product(name='Product 2', price=102)
-    product3 = Product(name='Product 3', price=103, product_id=5)
-    product4 = Product(name='Product 4', price=104)
-    assert product1.product_id == 1
-    assert product2.product_id == 2
-    assert product3.product_id == 5
-    assert product4.product_id == 6
-    assert product1.name == 'Product 1'
-    assert product2.name == 'Product 2'
-    assert product3.name == 'Product 3'
-    assert product4.name == 'Product 4'
-    assert product1.price == 101
-    assert product2.price == 102
-    assert product3.price == 103
-    assert product4.price == 104
+    Product.add_product(name='Product 1')
+    Product.add_product(name='Product 2')
+    Product.add_product(name='Product 3', product_id=5)
+    Product.add_product(name='Product 4')
+    product = Product(name='Product 5')
+    Product.add_product_by_obj(product)
+    assert Product.get_by_id(1).product_id == 1
+    assert Product.get_by_id(5).product_id == 5
+    assert Product.get_by_id(7).name == product.name
 
 
-def test_product_factory():
+def test_upload_product():
     Product.clear_numbers()
-    product1 = Product(name='Product 1', price=101)
-    product2 = Product(name='Product 2', price=102)
-    product3 = Product(name='Product 3', price=103, product_id=5)
-    product4 = Product(name='Product 4', price=104)
-    product_factory = ProductFactory()
-    assert len(product_factory.products) == 0
-    product_factory.add_product(product1)
-    product_factory.add_product(product2)
-    product_factory.add_product(product3)
-    product_factory.add_product(product4)
-    assert len(product_factory.products) == 4
+    products = [{'name': 'Product 1'}, {'name': 'Product 2'}, {'name': 'Product 3', 'product_id': 5}]
+    Product.upload_products(product_list=products)
+    assert Product.get_by_id(1).product_id == 1
+    assert Product.get_by_id(1).name == 'Product 1'
+    assert Product.get_by_id(2).product_id == 2
+    assert Product.get_by_id(5).product_id == 5
+    assert Product.get_by_id(5).name == 'Product 3'
 
 
-def test_upload_product_factory():
+def test_product_name():
     Product.clear_numbers()
-    product1 = Product(name='Product 1', price=101)
-    product2 = Product(name='Product 2', price=102)
-    product3 = Product(name='Product 3', price=103, product_id=5)
-    product4 = Product(name='Product 4', price=104)
-    product_factory = ProductFactory()
-    assert len(product_factory.products) == 0
-    products = []
-    products.append(product1.to_dict())
-    products.append(product2.to_dict())
-    products.append(product3.to_dict())
-    products.append(product4.to_dict())
-    product_factory.upload_products(product_list=products)
-    assert len(product_factory.products) == 4
-
-
-def test_get_product():
-    Product.clear_numbers()
-    product1 = Product(name='Product 1', price=101)
-    product2 = Product(name='Product 2', price=102)
-    product3 = Product(name='Product 3', price=103, product_id=5)
-    product4 = Product(name='Product 4', price=104)
-    product_factory = ProductFactory()
-    product_factory.add_product(product1)
-    product_factory.add_product(product2)
-    product_factory.add_product(product3)
-    product_factory.add_product(product4)
-    assert product_factory.get_product_by_id(1) == product1
-    assert product_factory.get_product_by_id(6) == product4
+    Product.add_product(name='Product 1')
+    Product.add_product(name='Product 2', product_id=5)
+    product = Product(name='Product 3')
+    Product.add_product_by_obj(product)
+    prod_name = 'Prod'
+    products = Product.get_by_name(prod_name)
+    for product in products:
+        assert prod_name in product.name

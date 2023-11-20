@@ -1,22 +1,28 @@
-from src.stock import Stock
-from uuid import uuid4
-
-
 class Product:
     __last_product_number = 0
+    __catalog = {}
 
-    def __init__(self, name, price, product_id=0):
+    def __init__(self, name, product_id=0):
         if product_id == 0:
-            self.product_id = Product.__new_number()
+            self.__product_id = Product.__new_number()
         else:
-            self.product_id = product_id
+            self.__product_id = product_id
             if Product.__last_product_number < product_id:
                 Product.__last_product_number = product_id
-        self.name = name
-        self.price = price
+        self.__name = name
+
+    @property
+    def product_id(self):
+        """ Идентификатор """
+        return self.__product_id
+
+    @property
+    def name(self):
+        """ Наименование """
+        return self.__name
 
     def __repr__(self):
-        return f"Product({self.product_id}, {self.name}, {self.price})"
+        return f"Product({self.product_id}, {self.name})"
 
     def __str__(self):
         return f"Наименование: {self.name} Идентификатор: {self.product_id}"
@@ -25,7 +31,6 @@ class Product:
         return {
             "product_id": self.product_id,
             "name": self.name,
-            "price": self.price
         }
 
     @classmethod
@@ -44,28 +49,44 @@ class Product:
         """ Очистка счетчика номера продуктов """
         cls.__last_product_number = 0
 
+    @classmethod
+    def add_product(cls, name, product_id=0):
+        """ Добавить продукт в каталог """
+        product = Product(name=name, product_id=product_id)
+        product_value = {'object': product, }
+        cls.__catalog[product.product_id] = product_value
 
-class ProductFactory:
-    def __init__(self):
-        """ Хранилище информации о продуктах """
-        self.products = []
-        Product.clear_numbers()
+    @classmethod
+    def add_product_by_obj(cls, product):
+        """ Добавить продукт в каталог по ссылке """
+        product_value = {'object': product, }
+        cls.__catalog[product.product_id] = product_value
 
-    def add_product(self, product: Product):
-        """ Добавить продукт в хранилище """
-        self.products.append(product)
+    @classmethod
+    def get_by_id(cls, product_id):
+        """ Получить ссылку на продукт """
+        product = cls.__catalog.get(product_id, None)
+        if product is not None:
+            return product['object']
+        return None
 
-    def upload_products(self, product_list=[]):
-        """ Добавить продукты из словаря в хранилище """
+    @classmethod
+    def get_by_name(cls, name):
+        product_list = []
+        obj = None
+        for item in cls.__catalog.values():
+            obj = item['object']
+            if name in obj.name:
+                product_list.append(obj)
+        return product_list
+
+    @classmethod
+    def upload_products(cls, product_list={}):
+        """ Добавить продукты в каталог """
         for item in product_list:
-            product = Product(name=item['name'], price=item['price'], product_id=item['product_id'])
-            self.add_product(product)
-
-    def get_product_by_id(self, product_id):
-        """ Вернуть продукт по ID """
-        for item in self.products:
-            if item.product_id == product_id:
-                return item
+            name = item.get('name', 'Без наименования')
+            product_id = item.get('product_id', 0)
+            cls.add_product(name=name, product_id=product_id)
 
 
 class Meat(Product):
