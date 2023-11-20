@@ -8,10 +8,9 @@ from __future__ import annotations
 # позволяет использовать описание классов определенных ниже
 from abc import ABC, abstractmethod
 import PySimpleGUI as Sg
-from src.products import Product, ProductFactory
+from src.products import Product
 from src.stock import Stock
 from src.order import Order
-
 
 
 class Context:
@@ -55,7 +54,7 @@ class Context:
         self.layout_catalog = [[Sg.Frame('Каталог товаров', layout=self.layout_lbc)]]
         self.layout_stock = [[Sg.Frame('Склад', layout=self.layout_lbs)]]
         self.layout_order = [[Sg.Frame('Заказ', layout=self.layout_lbo)]]
-        self.layout_output = [[Sg.T('Консоль вывода')], [Sg.Output(s=(100,10))]]
+        self.layout_output = [[Sg.T('Консоль вывода')], [Sg.Output(s=(100, 10))]]
 
         # set layout
         self.layout = [[Sg.Column(self.layout_main)],
@@ -72,19 +71,19 @@ class Context:
         # загрузить из файлов в модель
 
         # получить данные из модели
-        product_factory = ProductFactory()
-        product_factory.add_product(Product(name='Product 1', price=101))
-        product_factory.add_product(Product(name='Product 2', price=102))
-        product_factory.add_product(Product(name='Product 3', price=103, product_id=5))
-        product_factory.add_product(Product(name='Product 4', price=104))
-        self.item_list_c.extend(product_factory.products)
+        Product.add_product_by_obj(Product(name='Product 1'))
+        Product.add_product_by_obj(Product(name='Product 2'))
+        Product.add_product_by_obj(Product(name='Product 3', product_id=5))
+        Product.add_product_by_obj(Product(name='Product 4'))
+        for obj in Product.catalog().values():
+            self.item_list_c.append(obj['object'])
 
         stock = Stock()
-        stock.add_product(product=product_factory.get_product_by_id(1), quantity=10)
-        stock.add_product(product=product_factory.get_product_by_id(2), quantity=3)
-        stock.add_product(product=product_factory.get_product_by_id(5))
-        self.item_list_s.extend(stock.products)
-
+        stock.add_product(product=Product.get_by_id(1), quantity=10)
+        stock.add_product(product=Product.get_by_id(2), quantity=3)
+        stock.add_product(product=Product.get_by_id(5))
+        for itm in stock.stock.values():
+            self.item_list_s.append([itm['object'], itm['quantity']])
 
         for itm_o in range(5):
             order = Order()
@@ -276,7 +275,7 @@ class StateStock(State):
         elif event == '-LBSS-':
             print('Идентификатор и количество')
             for itm in values['-LBS-']:
-                print(itm.product_id, itm.quantity)
+                print(itm[0].product_id, itm[1])
 
 
 class StateOrder(State):
