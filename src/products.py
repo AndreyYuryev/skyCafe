@@ -88,6 +88,11 @@ class Product:
             product_id = item.get('product_id', 0)
             cls.add_product(name=name, product_id=product_id)
 
+    @classmethod
+    def catalog(cls):
+        """ Каталог продуктов """
+        return cls.__catalog
+
 
 class Meat(Product):
     """
