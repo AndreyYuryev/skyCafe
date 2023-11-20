@@ -40,6 +40,10 @@ class Stock:
         else:
             stock_value['quantity'] += quantity
 
+    @property
+    def stock(self):
+        return self.__stock
+
     # def __str__(self):
     #     return "Здесь хранятся все наши продукты"
     #
