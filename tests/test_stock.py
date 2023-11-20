@@ -4,18 +4,46 @@ from src.products import Product
 
 def test_product_stock():
     Product.clear_numbers()
-    product1 = Product(name='Product 1', price=101)
-    product2 = Product(name='Product 2', price=102)
-    product3 = Product(name='Product 3', price=103, product_id=5)
-    product4 = Product(name='Product 4', price=104)
+    product1 = Product(name='Product 1')
+    Product.add_product_by_obj(product1)
+    product2 = Product(name='Product 2')
+    Product.add_product_by_obj(product2)
+    product3 = Product(name='Product 3', product_id=5)
+    Product.add_product_by_obj(product3)
+    product4 = Product(name='Product 4')
+    Product.add_product_by_obj(product4)
     stock = Stock()
     stock.add_product(product=product1, quantity=10)
     stock.add_product(product=product3, quantity=3)
-    stock.add_product(product=product4)
-    assert not stock.is_product_in_stock(product2)
-    assert stock.is_product_in_stock(product3)
-    assert stock.get_quantity(product3) == 3
-    assert stock.get_quantity(product4) == 0
+    stock.add_product(product=product4, quantity=22)
+    assert stock.get_quantity_by_id(1) == 10
+    assert stock.get_quantity_by_id(2) == 0
+    assert stock.get_quantity_by_id(5) == 3
+    assert stock.get_quantity_by_id(6) == 22
+    assert stock.get_quantity_by_product(product3) == 3
+
+def test_add_quantity():
+    Product.clear_numbers()
+    product1 = Product(name='Product 1')
+    Product.add_product_by_obj(product1)
+    Product.add_product_by_obj(Product(name='Product 2'))
+    Product.add_product_by_obj(Product(name='Product 3', product_id=5))
+    Product.add_product_by_obj(Product(name='Product 4'))
+    stock = Stock()
+    stock.add_product(product=Product.get_by_id(1), quantity=10)
+    stock.add_product(product=Product.get_by_id(2), quantity=3)
+    stock.add_product(product=Product.get_by_id(5), quantity=22)
+    stock.add_quantity_by_product(Product.get_by_id(1), quantity=5)
+    assert stock.get_quantity_by_id(1) == 15
+    stock.add_quantity_by_product(Product.get_by_name('Product 3')[0], quantity=6)
+    assert stock.get_quantity_by_id(5) == 28
+
+
+
+    # assert not stock.is_product_in_stock(product2)
+    # assert stock.is_product_in_stock(product3)
+    # assert stock.get_quantity(product3) == 3
+    # assert stock.get_quantity(product4) == 0
 
 #
 # def test_stock():
