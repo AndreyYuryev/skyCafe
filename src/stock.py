@@ -2,49 +2,93 @@ class Stock:
     """
     Класс для хранения склада
     """
-    products = []
+    __stock = {}
 
-    def __init__(self):
-        pass
+    def __init__(self, name='Склад 1'):
+        self.__name = name
 
-    def __str__(self):
-        return "Здесь хранятся все наши продукты"
+    @property
+    def name(self):
+        return self.__name
 
-    def __repr__(self):
-        pass
+    def add_product(self, product, quantity=0):
+        """
+        Добавить продукт на склад
+        """
+        product_id = product.product_id
+        product_value = {'object': product, 'quantity': quantity}
+        self.__stock[product_id] = product_value
 
-    @classmethod
-    def is_product_in_stock(cls, product):
-        """
-        Проверить наличие продукта в наличии:
-        """
-        return product in cls.products
+    def get_quantity_by_id(self, product_id):
+        """ Получить количество продукта по ID """
+        stock_value = self.__stock.get(product_id, None)
+        if stock_value is not None:
+            return stock_value['quantity']
+        return 0
 
-    @classmethod
-    def add_product(cls, product, quantity=0):
-        """
-        Добавить продукт:
-        """
-        product["quantity"] = quantity
-        cls.products.append(product)
+    def get_quantity_by_product(self, product):
+        """ Получить количество по продукту """
+        product_id = product.product_id
+        return self.get_quantity_by_id(product_id)
 
-    @classmethod
-    def remove_product(cls, product):
-        """
-        Удалить продукт:
-        """
-        cls.products.remove(product)
+    def add_quantity_by_product(self, product, quantity):
+        """ Добавить количество по продукту"""
+        product_id = product.product_id
+        stock_value = self.__stock.get(product_id, None)
+        if stock_value is None:
+            self.add_product(product=stock_value['object'], quantity=quantity)
+        else:
+            stock_value['quantity'] += quantity
 
-    @classmethod
-    def add_quantity(cls, product, quantity):
-        """
-        Увеличить количество продукта:
-        """
-        cls.products[product]["quantity"] += quantity
+    @property
+    def stock(self):
+        return self.__stock
 
-    @classmethod
-    def remove_quantity(cls, product, quantity):
-        """
-        Уменьшить количество продукта:
-        """
-        product["quantity"] -= quantity
+    # def __str__(self):
+    #     return "Здесь хранятся все наши продукты"
+    #
+    # def __repr__(self):
+    #     pass
+    #
+    # def is_product_in_stock(self, product):
+    #     """
+    #     Проверить наличие продукта в наличии:
+    #     """
+    #     for item in self.products:
+    #         if item.product_id == product.product_id:
+    #             return True
+    #     return False
+    #
+    # def add_product(self, product, quantity=0):
+    #     """
+    #     Добавить продукт:
+    #     """
+    #     self.products.append(StockItem(product_id=product.product_id, name=product.name, quantity=quantity))
+    #
+    # def remove_product(self, product):
+    #     """
+    #     Удалить продукт:
+    #     """
+    #     for item in self.products:
+    #         if product.product_id == item.product_id:
+    #             del item
+    #
+    # def get_quantity(self, product):
+    #     """ Вернуть количество продукта """
+    #     for item in self.products:
+    #         if product.product_id == item.product_id:
+    #             return item.quantity
+    #
+    # @classmethod
+    # def add_quantity(cls, product, quantity):
+    #     """
+    #     Увеличить количество продукта:
+    #     """
+    #     cls.products[product]["quantity"] += quantity
+    #
+    # @classmethod
+    # def remove_quantity(cls, product, quantity):
+    #     """
+    #     Уменьшить количество продукта:
+    #     """
+    #     product["quantity"] -= quantity
