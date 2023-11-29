@@ -64,7 +64,7 @@ class Context:
                         Sg.Column(self.layout_order, visible=False, key='-COLO-')],
                        [Sg.Column(self.layout_output, visible=True)]]
         # run window
-        self.window = Sg.Window('CkyCafe', self.layout, size=(800, 600))
+        self.window = Sg.Window('skyCafe', self.layout, size=(800, 600))
 
     def lazy_load(self):
         """ Загрузка данных в модель """
